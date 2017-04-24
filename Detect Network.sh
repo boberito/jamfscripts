@@ -1,0 +1,3 @@
+#!/bin/sh
+
+networksetup -detectnewhardware
