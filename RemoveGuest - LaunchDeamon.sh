@@ -10,7 +10,7 @@ yourCompany="MyCompany"
 ##################
 ##CREATE SCRIPT###
 ##################
-cat << EOF > $scriptLocation$scriptName
+cat << EOF > ${scriptLocation}${scriptName}
 #!/bin/bash
 
 #set interface name and network you're hunting for
@@ -40,18 +40,18 @@ EOF
 ##CREATE LAUNCHDAEMON###
 ########################
 
-cat << EOF > /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
+cat << EOF > /Library/LaunchDaemons/com.${yourCompany}.removeguest.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.$yourCompany.removeguest2</string>
+	<string>com.${yourCompany}.removeguest2</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>sh</string>
 		<string>-c</string>
-		<string>$scriptLocation$scriptName</string>
+		<string>${scriptLocation}${scriptName}</string>
 	</array>
 	<key>WatchPaths</key>
 	<array>
@@ -62,8 +62,8 @@ cat << EOF > /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
 
 EOF
 
-chown rgendler:wheel $scriptLocation$scriptName
-chmod 755 $scriptLocation$scriptName
+chown rgendler:wheel ${scriptLocation}${scriptName}
+chmod 755 ${scriptLocation}${scriptName}
 
 chown root:wheel /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
 chmod 644 /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
