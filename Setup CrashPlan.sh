@@ -7,12 +7,8 @@
 #writes configuration file deployment property based off of student or technology or faculty/staff
 #installs CP
 
-
-
 CurrentUser=$3
 CrashPlanURL=$4
-echo $3
-echo $4
 
 curl -k -s "$CrashPlanURL" > /var/tmp/CP.dmg
 
@@ -22,26 +18,26 @@ chmod -R 775 "/Library/Application Support/CrashPlan/"
 if id "$CurrentUser" | grep "Students"; then
 	#Student Key
 		cat <<EOF>"/Library/Application Support/CrashPlan/deploy.properties"
-DEPLOYMENT_URL=https://saes-cp-a.saes.org:4285
-DEPLOYMENT_POLICY_TOKEN=9116980d-4106-4d54-abb3-72000471eed6
+DEPLOYMENT_URL=CRASHPLAN URL
+DEPLOYMENT_POLICY_TOKEN=ENTER TOKEN
 CP_SILENT=false
-SSL_WHITELIST=5783bcc4432f757676eca52e8dff7f86f40020c8
+SSL_WHITELIST=ENTER SSL WHITELIST
 EOF
 elif id "$CurrentUser" | grep "Tech"; then
 	#Technology Key
 		cat <<EOF>"/Library/Application Support/CrashPlan/deploy.properties"
-DEPLOYMENT_URL=https://saes-cp-a.saes.org:4285
-DEPLOYMENT_POLICY_TOKEN=fc23aa7c-7c87-4ba0-b163-7f3c50967c20
+DEPLOYMENT_URL=CRASHPLAN URL
+DEPLOYMENT_POLICY_TOKEN=ENTER TOKEN
 CP_SILENT=false
-SSL_WHITELIST=5783bcc4432f757676eca52e8dff7f86f40020c8
+SSL_WHITELIST=ENTER SSL WHITELIST
 EOF
 else	
 	#Faculty & Staff Key
 		cat <<EOF>"/Library/Application Support/CrashPlan/deploy.properties"
-DEPLOYMENT_URL=https://saes-cp-a.saes.org:4285
-DEPLOYMENT_POLICY_TOKEN=e77873b7-39df-48f0-980f-a90591d5a080
+DEPLOYMENT_URL=CRASHPLAN URL
+DEPLOYMENT_POLICY_TOKEN=ENTER TOKEN
 CP_SILENT=false
-SSL_WHITELIST=5783bcc4432f757676eca52e8dff7f86f40020c8
+SSL_WHITELIST=ENTER SSL WHITELIST
 EOF
 fi
 
