@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#On Enrollment run the script from
+#https://www.macblog.org/post/automatically-renaming-computers-from-a-google-sheet-with-jamf-pro/
+#Computer is renamed, now at first login it'll personalize that
+
 #Runs at login to set computer name, re-joins AD, and sets user and department
 
 InventoryTag=$(hostname)
@@ -48,12 +52,14 @@ echo $ComputerName > /var/.computername
 
 #removes from AD, renames computer, and rejoins AD
 #does an authenticated AD remove which removes it from AD server itself
-dsconfigad -remove -u administrator -p ***REMOVED***
+dsconfigad -remove -u ENTER-AD-USER -p ENTER-AD-PASSWORD
 scutil --set ComputerName "$ComputerName"
 scutil --set LocalHostName "$ComputerName"
 scutil --set HostName "$ComputerName"
 jamf setComputerName -name "$ComputerName"
 dscacheutil -flushcache
+
+#Rejoin AD
 jamf policy -event joinad
 
 rm -f /var/tmp/computernames.csv
