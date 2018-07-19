@@ -35,9 +35,9 @@ pashua_run() {
 }
 
 #API login info
-apiuser=jssapi
-apipass='$Cf386a!'
-jamfProURL="https://casper.saes.org:8443"
+apiuser="JSS API USER"
+apipass="JSS API USER PASSWORD"
+jamfProURL="YOUR JAMF PRO SERVER"
 
 #update via serial number
 apiURL="JSSResource/computers/serialnumber"
@@ -57,7 +57,6 @@ xmlresult=$(curl -k "$jamfProURL/JSSResource/departments" --user "$apiuser:$apip
 #Cut last character
 xmlresult=${xmlresult%?}
 
-
 #Replace and cut the lines we don't need
 tweaked=$(sed 's/,/ \\\npop.option =/g' <<< $xmlresult)
 tweaked=$(echo $tweaked | grep -v "AppleTVs" | grep -v "iPads" | grep -v "Class" | grep -v "Cart" | grep -v "Video" | grep -v "Library" | grep -v "Macs")
@@ -74,11 +73,4 @@ pop.width = 300
 pop.option = $tweaked"
 pashua_run "$conf"
 
-#apiData="<computer><location><username>$getUser</username><real_name>$getRealName</real_name><department>$pop</department></location></computer>"
-
-#curl -sSkiu ${apiuser}:${apipass} "${jamfProURL}/${apiURL}/${MacSerial}" \
-#	-H "Content-Type: text/xml" \
-#	-d "${xmlHeader}${apiData}" \
-#	-X PUT > /dev/null
-
-jamf recon -endUsername $getUser -department "$pop" -building "Postoak" -realname "$getRealName" -email "$getUser@saes.org"
+jamf recon -endUsername $getUser -department "$pop" -building "Postoak" -realname "$getRealName" -email "$getUser@emailaddress"
