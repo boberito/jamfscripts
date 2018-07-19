@@ -3,11 +3,14 @@
 #Sets up a script and creates a launchdeamon that watches com.apple.airport.preferences.plist
 #This changes whenever you join a network. If the Guest network is joined, then remove it and bop them off of it
 
+sciptLocation="/usr/local/"
+scriptName="removeGuest.sh"
+yourCompany="MyCompany"
 
 ##################
 ##CREATE SCRIPT###
 ##################
-cat << EOF > /usr/local/removeGuest.sh
+cat << EOF > $scriptLocation$scriptName
 #!/bin/bash
 
 #set interface name and network you're hunting for
@@ -43,12 +46,12 @@ cat << EOF > /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.YOURCOMPANY.removeguest2</string>
+	<string>com.$yourCompany.removeguest2</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>sh</string>
 		<string>-c</string>
-		<string>/usr/local/removeGuest.sh</string>
+		<string>$scriptLocation$scriptName</string>
 	</array>
 	<key>WatchPaths</key>
 	<array>
@@ -59,10 +62,10 @@ cat << EOF > /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
 
 EOF
 
-chown rgendler:wheel /usr/local/removeGuest.sh
-chmod 755 /usr/local/removeGuest.sh
+chown rgendler:wheel $scriptLocation$scriptName
+chmod 755 $scriptLocation$scriptName
 
-chown root:wheel /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
-chmod 644 /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
+chown root:wheel /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
+chmod 644 /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
 
-launchctl load -w /Library/LaunchDaemons/com.YOURCOMPANY.removeguest.plist
+launchctl load -w /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
