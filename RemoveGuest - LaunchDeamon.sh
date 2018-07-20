@@ -62,7 +62,7 @@ cat << EOF > /Library/LaunchDaemons/com.${yourCompany}.removeguest.plist
 
 EOF
 
-chown rgendler:wheel ${scriptLocation}${scriptName}
+chown root:wheel ${scriptLocation}${scriptName}
 chmod 755 ${scriptLocation}${scriptName}
 
 chown root:wheel /Library/LaunchDaemons/com.$yourCompany.removeguest.plist
