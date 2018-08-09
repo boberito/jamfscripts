@@ -11,7 +11,7 @@ else
     cd /tmp/downloads
 
     OfficeURL=$(curl -s https://macadmins.software | grep "Office Suite Install" | awk -F "a href" '{ print $2 }' | awk -F "'" '{ print $2 }')
-    curl -s -o office.pkg $OfficeURL
+    curl -s -o office.pkg -L $OfficeURL
     installer -target / -pkg "/tmp/downloads/office.pkg"
     rm office.pkg
     rm -rf /tmp/downloads
