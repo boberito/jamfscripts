@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CurrentOfficeRelease=$(curl -s https://macadmins.software | grep "Office Suite Install" | awk -F "a href" '{ print $1 }' | awk -F ">" '{print $10}' | awk -F " " '{print $1}')
+CurrentOfficeRelease=$(curl -s https://macadmins.software | grep "Office 365 Suite Install" | awk -F "a href" '{ print $1 }' | awk -F ">" '{print $10}' | awk -F " " '{print $1}')
 CurrentOfficeInstalled=$(defaults read /Applications/Microsoft\ Word.app/Contents/Info.plist CFBundleVersion)
 
 if [ "$CurrentOfficeRelease" = "$CurrentOfficeInstalled" ]; then
