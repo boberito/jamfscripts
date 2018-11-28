@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #Variables that need set
 #Both could be set as parameters in a jamf script
 prefLocation="/var/ForcedReboot.plist"
