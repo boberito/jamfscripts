@@ -1,10 +1,13 @@
 #!/bin/bash
 
-
 #Variables that need set
-#Both could be set as parameters in a jamf script
-prefLocation="/var/ForcedReboot.plist"
-daysToDefer="4"
+#$4 set as "appleupdates" if you want apple softwareupdate ran.
+#$5 is days to defer
+prefLocation="/var/nist/info/NISTReboot.plist"
+boundName=$(dsconfigad -show | awk '/Computer Account/{print $NF}' | sed 's/$$//')
+daysToDefer="$5"
+
+
 
 ##########REBOOT LATER FUNCTION#################
 function rebootLater {
@@ -18,9 +21,7 @@ function rebootLater {
     DaysFromNow=$(/usr/libexec/PlistBuddy -c "print :DaysFromNow" "${prefLocation}")
     declare -i DaysLeftToDefer
     DaysLeftToDefer=$(/usr/libexec/PlistBuddy -c "print :DaysLeftToDefer" "${prefLocation}")
-
-
-
+    
     description="An update to your computer was installed on ${installedDate}, ${dateDiff} days ago. 
     
 Your computer requires a restart. It will be restarted in ${DaysLeftToDefer} days"
@@ -33,20 +34,20 @@ Your computer requires a restart. It will be restarted in ${DaysLeftToDefer} day
 
 	if [ "${installationdelay}" = "2" ]; then
         #Subtract a day left from the preference file.
-        DaysLeftToDefer=DaysLeftToDefer-1
+        DaysLeftToDefer=$((DaysLeftToDefer-1))
     	/usr/libexec/PlistBuddy -c "set :DaysLeftToDefer ${DaysLeftToDefer}" "${prefLocation}"
 
     else
         #if NOW is selected or dialog box timed out
         if [[ $installationdelay -eq 1 ]];then
-            echo "jamf reboot -startTimerImmediately -background"
+            jamf reboot -startTimerImmediately -background
         else
         #Do this in X minutes. Dialog gives you seconds, gotta convert to minutes and strip off the exit code.
             declare -i delayInMin
             size=${#installationdelay}
             delayInMin=${installationdelay:0:size-1}/60
             rm -f ${prefLocation}
-            echo "jamf reboot -minutes ${delayInMin} -startTimerImmediately -background"
+            jamf reboot -minutes "${delayInMin}" -startTimerImmediately -background
         fi
 	fi
 }
@@ -72,40 +73,64 @@ Your computer requires a restart. Please save all work as your computer will be 
     #if NOW is selected or dialog box timed out
     if [[ $installationdelay -eq 1 ]]; then
         rm -f ${prefLocation}
-        echo "jamf reboot -startTimerImmediately -background"
+        jamf reboot -background
     else
     #Do this in X minutes. Dialog gives you seconds, gotta convert to minutes and strip off the exit code.
         declare -i delayInMin
         size=${#installationdelay}
         delayInMin=${installationdelay:0:size-1}/60
         rm -f ${prefLocation}
-        echo "jamf reboot -minutes ${delayInMin} -startTimerImmediately -background"
+        jamf reboot -minutes "${delayInMin}" -startTimerImmediately -background
     fi
 }
 
+#####The Main Portion#####
+
 #if the plist doesnt exist, create it
 if [ ! -f "${prefLocation}" ]; then
+    
+    #Check Apple Software Updates
+    if [[ "$4" = "appleupdates" ]]; then
+        rebootRequired=$(softwareupdate -l | grep -o restart 2>&1)
+        if [[ "$rebootRequired" =~ "restart" ]]; then
+            echo "Apple Software Update requires a reboot"
+            softwareupdate -i -a
+        else
+            echo "Apple Software Update does not require a reboot"
+            softwareupdate -i -a
+            exit 0
+        fi
+    fi
+
     DaysFromNow=$(date -v +${daysToDefer}d "+%m-%d-%Y")
     installedDate=$(date "+%m-%d-%Y")
     /usr/libexec/PlistBuddy -c "add :installedDate string ${installedDate}" "${prefLocation}" &> /dev/null
     /usr/libexec/PlistBuddy -c "add :DaysFromNow string ${DaysFromNow}" "${prefLocation}"
     /usr/libexec/PlistBuddy -c "add :DaysLeftToDefer string ${daysToDefer}" "${prefLocation}"
+    jamf recon&
 
 #if it does exist, then we must have an update installed
 else
-    declare -i dateDiff
-    installedDate=$(/usr/libexec/PlistBuddy -c "print :installedDate" "${prefLocation}")
-    todayDate=$(date "+%m-%d-%Y")
-    DaysFromNow=$(/usr/libexec/PlistBuddy -c "print :DaysFromNow" "${prefLocation}")
-    dateDiff=$(date -j -f "%m-%d-%Y" "$todayDate" "+%s")-$(date -j -f "%m-%d-%Y" "$installedDate" "+%s")
-    dateDiff=dateDiff/86400
-    DaysLeftToDefer=$(/usr/libexec/PlistBuddy -c "print :DaysLeftToDefer" "${prefLocation}")
+	
+    loggedInUser=$(python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
+	if [  -z "$loggedInUser" ]; then
+		echo "Nobody logged in, here we go"
+		jamf reboot -background
+   	
+	else
     
+	    declare -i dateDiff
+    	installedDate=$(/usr/libexec/PlistBuddy -c "print :installedDate" "${prefLocation}")
+	    todayDate=$(date "+%m-%d-%Y")
+    	DaysFromNow=$(/usr/libexec/PlistBuddy -c "print :DaysFromNow" "${prefLocation}")
+	    dateDiff=$(date -j -f "%m-%d-%Y" "$todayDate" "+%s")-$(date -j -f "%m-%d-%Y" "$installedDate" "+%s")
+    	dateDiff=dateDiff/86400
+	    DaysLeftToDefer=$(/usr/libexec/PlistBuddy -c "print :DaysLeftToDefer" "${prefLocation}")
     
-    if [[ $dateDiff -ge $daysToDefer ]] || [[ $DaysLeftToDefer -eq 0 ]]; then
-        rebootNow
-    else
-        rebootLater
-    fi
+    	if [[ $dateDiff -ge $daysToDefer ]] || [[ $DaysLeftToDefer -eq 0 ]]; then
+        	rebootNow
+	    else
+    	    rebootLater
+	    fi
+	fi
 fi
-
