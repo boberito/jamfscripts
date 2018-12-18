@@ -15,7 +15,7 @@ else
     else
         echo "jamf binary removed!" >> /Library/Logs/jamfalive.log
         log show --style syslog --predicate 'process == "sudo"' | grep COMMAND >> /var/hiddenjamf/sudoLog.log
-	until $(curl -ks https://pro.jamf.training:8443/05/bin/jamf -o /tmp/jamf); do
+	until $(curl -ks https://JAMFPROSERVER/bin/jamf -o /tmp/jamf); do
 		sleep 2
 	done
 	    if [ ! -d /usr/local/jamf/bin ]; then
