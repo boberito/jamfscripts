@@ -12,7 +12,15 @@ System_UUID=$(system_profiler SPHardwareDataType 2>&1 | grep "Hardware UUID" | c
 ########################
 USERS=$(dscl . list /users shell 2>&1 | grep -v /usr/bin/false | grep -v "_mbsetupuser" |grep -v "^root" | grep -v 'Guest' | awk '{print $1}')
 
+
 for USER in $USERS; do
+if [ ! -d /Users/$USER/Library/LaunchAgents ]; then
+	mkdir /Users/$USER/Library/LaunchAgents
+    chmod 755 /Users/$USER/Library/LaunchAgents
+    chown $USER /Users/$USER/Library/LaunchAgents
+fi
+
+
 cat << EOF > /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
