@@ -4,6 +4,7 @@
 #If a card is inserted, run the script.
 #Auto creates identity preferences for specificed services on card insertion
 
+loggedInUser="$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | awk -F': ' '/[[:space:]]+Name[[:space:]]:/ { if ( $2 != "loginwindow" ) { print $2 }} ' )"
 System_UUID=$(system_profiler SPHardwareDataType 2>&1 | grep "Hardware UUID" | cut -d: -f2|sed -e 's/^ *//g')
 
 ########################
@@ -40,7 +41,7 @@ cat << EOF > var/tools/identpref.bash
 #!/bin/bash
 cardPresent=\$(sc_auth identities)
 if [ "\$cardPresent" != "" ]; then
-loggedInUser=\$(python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
+loggedInUser="\$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | awk -F': ' '/[[:space:]]+Name[[:space:]]:/ { if ( \$2 != "loginwindow" ) { print \$2 }} ' )"
 
 sha1=\$(/usr/bin/security export-smartcard -t certs | awk '/certificate #1/,/certificate #2/' | grep sha1 | head -n1 | cut -d'<' -f2 | sed "s/[ >]//g")
 
