@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#Watch the ~/Library/Preferences/ByHost/com.apple.security.smartcard.xyz.plist for changes
+#If a card is inserted, run the script.
+#Auto creates identity preferences for specificed services on card insertion
+
+System_UUID=$(system_profiler SPHardwareDataType 2>&1 | grep "Hardware UUID" | cut -d: -f2|sed -e 's/^ *//g')
+
+########################
+##CREATE LAUNCHDAEMON###
+########################
+USERS=$(dscl . list /users shell 2>&1 | grep -v /usr/bin/false | grep -v "_mbsetupuser" |grep -v "^root" | grep -v 'Guest' | awk '{print $1}')
+
+for USER in $USERS; do
+cat << EOF > /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.YourOrg.prefident</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>bash</string>
+		<string>/var/tools/identpref.bash</string>
+	</array>
+	<key>WatchPaths</key>
+	<array>
+		<string>/Users/$USER/Library/Preferences/ByHost/com.apple.security.smartcard.$System_UUID.plist</string>
+	</array>
+</dict>
+</plist>
+
+EOF
+done
+##################
+##CREATE SCRIPT###
+##################
+cat << EOF > var/tools/identpref.bash
+#!/bin/bash
+cardPresent=\$(sc_auth identities)
+if [ "\$cardPresent" != "" ]; then
+loggedInUser=\$(python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
+
+sha1=\$(/usr/bin/security export-smartcard -t certs | awk '/certificate #1/,/certificate #2/' | grep sha1 | head -n1 | cut -d'<' -f2 | sed "s/[ >]//g")
+
+/usr/bin/security set-identity-preference -c "\$loggedInUser" -s 'identprefadded whatever.com' -Z "\$sha1"
+fi
+EOF
+
+chown root:wheel var/tools/identpref.bash
+chmod 755 var/tools/identpref.bash
+
+chown $loggedInUser /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
+chmod 644 /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
+
+sudo -u $loggedInUser launchctl load -w /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
