@@ -8,7 +8,7 @@ loggedInUser="$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | awk -F': 
 System_UUID=$(system_profiler SPHardwareDataType 2>&1 | grep "Hardware UUID" | cut -d: -f2|sed -e 's/^ *//g')
 
 ########################
-##CREATE LAUNCHDAEMON###
+###CREATE LAUNCHAGENT###
 ########################
 USERS=$(dscl . list /users shell 2>&1 | grep -v /usr/bin/false | grep -v "_mbsetupuser" |grep -v "^root" | grep -v 'Guest' | awk '{print $1}')
 
