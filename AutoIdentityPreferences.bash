@@ -41,6 +41,10 @@ cat << EOF > /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
 </plist>
 
 EOF
+
+
+chown $USER /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
+chmod 644 /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
 done
 ##################
 ##CREATE SCRIPT###
@@ -59,8 +63,5 @@ EOF
 
 chown root:wheel var/tools/identpref.bash
 chmod 755 var/tools/identpref.bash
-
-chown $loggedInUser /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
-chmod 644 /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
 
 sudo -u $loggedInUser launchctl load -w /Users/$loggedInUser/Library/LaunchAgents/com.YourOrg.prefident.plist
