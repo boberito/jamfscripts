@@ -4,14 +4,12 @@ mkdir /tmp/downloads
 cd /tmp/downloads
 
 # Installing VLC Player
-CurrentVLC=$(curl "http://get.videolan.org/vlc/last/macosx/" | grep .dmg | grep -v webplugin | grep -v md5 | grep -v sha1 | grep -v sha256 | awk '{print $2}' | awk -F ">" '{print $2}' | tr -d "</a")
+CurrentVLC=$(curl -s "http://get.videolan.org/vlc/last/macosx/" | grep .dmg | awk -F '"' '/.dmg/{print $2}' | grep -v "dmg.")
 
-curl -L -o vlc.dmg http://get.videolan.org/vlc/last/macosx/$CurrentVLC
+curl -s -L -o vlc.dmg http://get.videolan.org/vlc/last/macosx/$CurrentVLC
 
-hdiutil mount -nobrowse vlc.dmg -mountpoint /Volumes/vlc
-rsync -vaz /Volumes/vlc/VLC.app/ /Applications/VLC.app
+hdiutil mount -quiet -nobrowse vlc.dmg -mountpoint /Volumes/vlc
+rsync -vazq /Volumes/vlc/VLC.app/ /Applications/VLC.app
 hdiutil unmount "/Volumes/vlc"
 rm vlc.dmg
 rm -rf /tmp/downloads
-
-#Inspired from GetMacApps.com
