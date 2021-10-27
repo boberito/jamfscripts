@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Watch the ~/Library/Preferences/ByHost/com.apple.security.smartcard.xyz.plist for changes
+#Watch the ~/Library/Preferences/com.apple.security.ctkd-db.plist for changes
 #If a card is inserted, run the script.
 #Auto creates identity preferences for specificed services on card insertion
 
