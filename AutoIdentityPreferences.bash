@@ -35,7 +35,7 @@ cat << EOF > /Users/$USER/Library/LaunchAgents/com.YourOrg.prefident.plist
 	</array>
 	<key>WatchPaths</key>
 	<array>
-		<string>/Users/$USER/Library/Preferences/ByHost/com.apple.security.smartcard.$System_UUID.plist</string>
+		<string>/Users/$USER/Library/Preferences/com.apple.security.ctkd-db.plist</string>
 	</array>
 </dict>
 </plist>
@@ -55,7 +55,7 @@ cardPresent=\$(sc_auth identities)
 if [ "\$cardPresent" != "" ]; then
 loggedInUser="\$(/usr/sbin/scutil <<< "show State:/Users/ConsoleUser" | awk -F': ' '/[[:space:]]+Name[[:space:]]:/ { if ( \$2 != "loginwindow" ) { print \$2 }} ' )"
 
-sha1=\$(/usr/bin/security export-smartcard -t certs | awk '/certificate #1/,/certificate #2/' | grep sha1 | head -n1 | cut -d'<' -f2 | sed "s/[ >]//g")
+sha1=\$(/usr/bin/security export-smartcard -t certs | grep "Certificate For PIV Authentication" -A 5 | grep sha1 | head -n1 | cut -d'<' -f2 | sed "s/[ >]//g")
 
 /usr/bin/security set-identity-preference -c "\$loggedInUser" -s 'identprefadded whatever.com' -Z "\$sha1"
 fi
