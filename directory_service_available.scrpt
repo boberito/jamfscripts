@@ -1,0 +1,21 @@
+#!/usr/bin/osascript -l JavaScript
+
+ObjC.import('OpenDirectory')
+
+function run() {
+    var session = $.ODSession.defaultSession;
+    var nodes = ObjC.unwrap(session.nodeNamesAndReturnError(null));
+    var EA = "<result>"
+    for (node of nodes){
+        var odnode = $.ODNode;
+        var result = ObjC.unwrap(odnode.nodeWithSessionNameError(session,node,null));
+
+        if( result ){
+            EA += ObjC.unwrap(node) + " is available.\n"
+        } else {
+            EA += ObjC.unwrap(node) + " is unavailable.\n"
+        }
+    }
+    EA += "</result>"
+    return(EA)
+}
